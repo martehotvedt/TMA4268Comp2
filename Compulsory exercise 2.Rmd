@@ -1,7 +1,7 @@
 ---
 title: "Compulsory Exercise 2: Title (give your project an informative title)"
 author:
-- Full name for group member \#1.
+Karianne Strand Bergem
 - Full name for group member \#2.
 - Full name for group member \#3.
 date: "`r format(Sys.time(), '%d %B, %Y')`"
