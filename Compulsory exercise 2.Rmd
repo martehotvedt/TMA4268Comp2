@@ -42,23 +42,73 @@ library("rmarkdown")
 
 <!--  Etc (load all packages needed). -->
 
+## Abstract
+
+
+## Introduction: Scope and purpose of your project
+Problemstillingen vår kan være om vi kan predikere alder basert på de variablene i Heart Failure-datasettet? Er det vi skal finne ut av liksom
+
+
+## Descriptive data analysis/statistics
 ```{r}
 data <- read.csv("heart.csv")
-head(data)
 ```
 
 
 
-## Introduction: Scope and purpose of your project
-
-
-## Descriptive data analysis/statistics
-
-
 ## Methods
+```{r, eval=TRUE, echo=TRUE}
+n <- nrow(data) # Number of observations
 
+# Indexes for the training set (70% of the data)
+train_idx <- sample(1:n, size = round(0.7 * n), replace = FALSE)
+
+# Split the data
+train_data <- data[train_idx, ]
+test_data <- data[-train_idx, ]
+```
+
+# Multiple linear regression
+
+# Ridge/Lasso
+Apply Ridge regression to the Heart dataset.
+```{r, eval=TRUE, echo=TRUE}
+library(glmnet)
+
+# Create design matrices
+x_train <- model.matrix(Age ~ ., data = train_data)[, -1]
+y_train <- train_data$Age
+x_test <- model.matrix(Age ~ ., data = test_data)[, -1]
+y_test <- test_data$Age
+
+# `alpha=0` is the ridge penalty
+ridge_mod <- glmnet(x_train, y_train, alpha = 0)
+
+# Cross-validation to find the best lambda
+set.seed(123)
+cv_ridge <- cv.glmnet(x_train, y_train, alpha = 0)
+
+plot(cv_ridge)
+```
+Now, we want to find the best $\lambda$.
+```{r, eval=TRUE, echo=TRUE}
+best_lambda <- cv_ridge$lambda.min
+best_lambda
+```
+Evaluate the method
+```{r, eval=TRUE, echo=TRUE}
+ridge_pred <- predict(cv_ridge, s = best_lambda, newx = x_test)
+mse <- mean((y_test - ridge_pred)^2)
+r2 <- 1 - sum((y_test - ridge_pred)^2) / sum((y_test - mean(y_test))^2)
+
+cat("MSE:", mse, "\n")
+cat("R²:", r2, "\n")
+```
 
 ## Results and interpretation
+Evaluere modellene på testsettet.
+Sammenligne metodene – hvilken ga best resultater?
+Diskutere hvilke variabler som har størst betydning for prediksjon av alder.
 
 
 ## Summary
