@@ -1,8 +1,8 @@
 ---
 title: "Compulsory Exercise 2: Title (give your project an informative title)"
 author:
-Karianne Strand Bergem
-- Full name for group member \#2.
+- "Karianne Strand Bergem"
+- "Marte Ragnhild Hotvedt"
 - Full name for group member \#3.
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 header-includes: \usepackage{amsmath}
