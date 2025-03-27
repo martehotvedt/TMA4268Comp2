@@ -42,6 +42,12 @@ library("rmarkdown")
 
 <!--  Etc (load all packages needed). -->
 
+```{r}
+data <- read.csv("heart.csv")
+head(data)
+```
+
+
 
 ## Introduction: Scope and purpose of your project
 
