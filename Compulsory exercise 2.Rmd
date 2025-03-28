@@ -73,7 +73,9 @@ test_data <- data[-train_idx, ]
 In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of method was due to the fact that MLR is easy to interpret. We assume that 
 
 $$\mathbf{Y} = \mathbf{X}\beta + \epsilon,$$
-where $\mathbf{Y}$ is a $(n \times 1)$ vector of responses (age), $\mathbf{X}$ is the $(n \times (p+1))$ design matrix, $\beta$ is a $((p+1) \times 1)$ of regression parameters, and $\epsilon$ is a $(n \times 1)$ vector of random errors. 
+where $\mathbf{Y}$ is a $(918 \times 1)$ vector of responses (age), $\beta$ is a $(12 \times 1)$ of regression parameters, and $\epsilon$ is a $(918 \times 1)$ vector of random errors. $\mathbf{X}$ is the $(918 \times 12)$ design matrix given by
+
+$$\mathbf{X} =$$
 
 # Ridge/Lasso
 Apply Ridge regression to the Heart dataset.
