@@ -1,5 +1,5 @@
 ---
-title: "Compulsory Exercise 2: Title (give your project an informative title)"
+title: "Compulsory Exercise 2: Age Prediction for Heart Failure"
 author:
 - "Karianne Strand Bergem"
 - "Marte Ragnhild Hotvedt"
@@ -69,6 +69,11 @@ test_data <- data[-train_idx, ]
 ```
 
 # Multiple linear regression
+
+In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of method was due to the fact that MLR is easy to interpret. We assume that 
+
+$$\mathbf{Y} = \mathbf{X}\beta + \epsilon,$$
+where $\mathbf{Y}$ is a $(n \times 1)$ vector of responses (age), $\mathbf{X}$ is the $(n \times (p+1))$ design matrix, $\beta$ is a $((p+1) \times 1)$ of regression parameters, and $\epsilon$ is a $(n \times 1)$ vector of random errors. 
 
 # Ridge/Lasso
 Apply Ridge regression to the Heart dataset.
