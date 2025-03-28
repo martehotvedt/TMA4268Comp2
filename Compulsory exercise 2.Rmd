@@ -75,7 +75,24 @@ In this section, we will consider Multiple Linear Regression (MLR) as a method t
 $$\mathbf{Y} = \mathbf{X}\beta + \epsilon,$$
 where $\mathbf{Y}$ is a $(918 \times 1)$ vector of responses (age), $\beta$ is a $(12 \times 1)$ of regression parameters, and $\epsilon$ is a $(918 \times 1)$ vector of random errors. $\mathbf{X}$ is the $(918 \times 12)$ design matrix given by
 
-$$\mathbf{X} =$$
+\begin{equation*}
+\mathbf{X} = \begin{bmatrix}
+1 & x_{1,1} & \dots & x_{1, 11} \\
+1 & x_{2,1} & \dots & x_{2, 11} \\
+\vdots & \dots & \dots & \vdots \\
+1 & x_{918,1} & \dots & x_{918, 11} \\
+\end{bmatrix},
+\end{equation*}
+
+where row $i$ contains a $(12 \times 1)$ vector $x^T_i$ for observation $i$. We assume that the $\epsilon \sim N_{918}(0, \sigma^2\mathbf{I})$.
+
+The regression
+
+```{r, eval = TRUE, echo = TRUE}
+mlr_mod <- lm(Age ~ ., data = train_data)
+summary(mlr_mod)
+```
+
 
 # Ridge/Lasso
 Apply Ridge regression to the Heart dataset.
