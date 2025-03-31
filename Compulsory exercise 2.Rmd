@@ -68,7 +68,7 @@ train_data <- data[train_idx, ]
 test_data <- data[-train_idx, ]
 ```
 
-# Multiple linear regression
+# Multiple Linear Regression
 
 In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of method was due to the fact that MLR is easy to interpret. We assume that 
 
