@@ -84,15 +84,22 @@ where $\mathbf{Y}$ is a $(918 \times 1)$ vector of responses (age), $\beta$ is a
 \end{bmatrix},
 \end{equation*}
 
-where row $i$ contains a $(16 \times 1)$ vector $x^T_i$ for observation $i$. We assume that the $\epsilon \sim N_{918}(0, \sigma^2\mathbf{I})$.
+where row $i$ contains a $(16 \times 1)$ vector $x^T_i$ for observation $i$. The design matrix has full rank. In addition, since the number of rows is $n = 918$ and of columns is $(p+1) = 16$, the model assumption $n >> (p+1)$ holds. We assume that $\epsilon \sim N_{918}(0, \sigma^2\mathbf{I})$.
 
-The regression
+The regression is done by the $\texttt{lm()}$-function:
 
 ```{r, eval = TRUE, echo = TRUE}
 mlr_mod <- lm(Age ~ ., data = train_data)
 summary(mlr_mod)
 ```
 
+To get an idea of which the predictors $X_1, \dots, X_n$ is useful in predicting the response, we check if we could as well omit all predictor variables at the same time. We formulate the test as 
+
+\begin{align*}
+H_0: \beta_1 = \beta_2 & = \dots = \beta_p = 0  \\
+&\text{vs.} \\
+H_1: \text{at least one } & \beta_j \text{ is non-zero.} 
+\end{align*}
 
 # Ridge/Lasso
 Apply Ridge regression to the Heart dataset.
