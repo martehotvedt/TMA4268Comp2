@@ -93,13 +93,30 @@ mlr_mod <- lm(Age ~ ., data = train_data)
 summary(mlr_mod)
 ```
 
-To get an idea of which the predictors $X_1, \dots, X_n$ is useful in predicting the response, we check if we could as well omit all predictor variables at the same time. We formulate the test as 
+To get an idea of which the predictors $X_1, \dots, X_n$ are useful in predicting the response, we check if we could as well omit all predictor variables at the same time. We formulate the test as 
 
 \begin{align*}
 H_0: \beta_1 = \beta_2 & = \dots = \beta_p = 0  \\
 &\text{vs.} \\
-H_1: \text{at least one } & \beta_j \text{ is non-zero.} 
+H_1: \text{at least } & \text{one } \beta_j \text{ is non-zero.} 
 \end{align*}
+
+If $H_0$ is true, the $F$-statistics is expected to be $\approx 1$. We observe from the R output that the $F$ is higher than $1$ and that the respective $p$-value is very small, which means the predictors are useful in predicting the response. This also coincides with the $p$-values for the estimates of the $\beta$-coefficients. However, we do notice that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. To check this we can reformulate the test to 
+
+\begin{align*}
+H_0: \beta_1 = \beta_2 & = \dots = \beta_q = 0  \\
+&\text{vs.} \\
+H_1: \text{at least } & \text{one } \beta_j \text{ is non-zero,} 
+\end{align*}
+
+where $q$ is the number of coefficients $\beta_j$ we want to test. We want to test if we can omit the coefficients with $p$-values higher than $0.05$. To do this, we can perform the test by the $\texttt{anova()}$-function:
+
+```{r, eval = TRUE, echo = TRUE}
+mlr_mod_small <- lm(Age ~ ChestPainType + RestingBP + FastingBS + RestingECG 
+                    + MaxHR + Oldpeak + ST_Slope, data = train_data)
+anova(mlr_mod_small, mlr_mod)
+```
+We observe a quite high $p$-value for the $F$-test, which means there is weak or even no evidence that the model gets better by including the coefficients with higher $p$-value than $0.05$. 
 
 # Ridge/Lasso
 Apply Ridge regression to the Heart dataset.
