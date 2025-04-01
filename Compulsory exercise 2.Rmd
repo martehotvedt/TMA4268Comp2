@@ -57,6 +57,8 @@ data <- read.csv("heart.csv")
 
 
 ## Methods
+We used the "Heart Failure Clinical Records" dataset and selected Age as the response variable. All other variables were used as predictors.
+Before we can apply the methods to the dataset, we need to split the data into training and test sets. Splitting the data ensures that we can train the model on one subset and evaluate its performance on unseen data, helping us assess how well the model generalizes. We randomly assign 70% of the data to the training set and the remaining 30% to the test set.
 ```{r, eval=TRUE, echo=TRUE}
 n <- nrow(data) # Number of observations
 
@@ -118,8 +120,26 @@ anova(mlr_mod_small, mlr_mod)
 ```
 We observe a quite high $p$-value for the $F$-test, which means there is weak or even no evidence that the model gets better by including the coefficients with higher $p$-value than $0.05$. 
 
-# Ridge/Lasso
-Apply Ridge regression to the Heart dataset.
+## Ridge regression
+We now aim to predict `Age` using a different method, in order to compare the results with those obtained from multiple linear regression. We have chosen to use Ridge regression, both to gain a better understanding of this technique and to optimize the model through the use of a hyperparameter. 
+
+Ridge Regression is an extension of linear regression that includes a penalty for large coefficient values. The goal is to reduce model variance and improve generalization. Instead of minimizing only the Residual Sum of Squares (RSS), Ridge adds an additional term to the loss function:
+
+$$
+\text{Loss} = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 + \lambda \sum_{j=1}^{p} \beta_j^2
+$$
+Where:
+\begin{itemize}
+  \item $ y_i $ are the observed values
+  \item $ \hat{y}_i $ are the model's predictions
+  \item $ \lambda $ is a hyperparameter that controls the strength of the penalty on large coefficient values $ \beta_j $
+\end{itemize}
+
+When $\lambda = 0$, the model is equivalent to ordinary linear regression.
+
+In practice, Ridge regression shrinks the coefficients toward zero, but never exactly to zero— this means that all variables are retained in the model.
+
+To implement the method to the Heart dataset, we used `model.matrix()` to create design matrices where all predictors are included. The categorical variables are automatically encoded as dummy variables. Ridge was implemented using the `glmnet` package in R, using $\alpha = 0$. Then, we used `cv.glmnet()` with 10-fold cross-validation to find the optimal value of lambda (the hyperparameter). The value `lambda.min` was used for the final models.
 ```{r, eval=TRUE, echo=TRUE}
 library(glmnet)
 
@@ -129,34 +149,61 @@ y_train <- train_data$Age
 x_test <- model.matrix(Age ~ ., data = test_data)[, -1]
 y_test <- test_data$Age
 
-# `alpha=0` is the ridge penalty
-ridge_mod <- glmnet(x_train, y_train, alpha = 0)
+ridge_mod <- glmnet(x_train, y_train, alpha = 0) # `alpha=0` is the ridge penalty
 
 # Cross-validation to find the best lambda
 set.seed(123)
 cv_ridge <- cv.glmnet(x_train, y_train, alpha = 0)
-
-plot(cv_ridge)
-```
-Now, we want to find the best $\lambda$.
-```{r, eval=TRUE, echo=TRUE}
 best_lambda <- cv_ridge$lambda.min
-best_lambda
 ```
-Evaluate the method
+Ridge regression is especially useful when two or more of the predictors are correlated with each other or when the number of predictors is large compared to the number of observations. The method helps prevent overfitting by adding just enough bias to make the model's estimates more stable and robust. It also helps reduce model complexity without completely removing variables.
+
+In our case, the most important advantages are that the method works well when the predictors are correlated. In our dataset, we can expect that variables such as `RestingBP`, `Cholesterol`, and `MaxHR` are related to each other. Additionally, Ridge regression is useful because we do not want to exclude any explanatory variables, but rather improve the precision of our predictions.
+
+The general disadvantages of Ridge regression are that it includes all predictors in the final model, which can make interpretation challenging when the number of predictors is large. Although the penalty term shrinks all coefficients toward zero, it never sets any of them exactly to zero. This limitation can make Lasso a more suitable alternative in cases where variable selection and model simplification are important.
+
+In our case, the number of predictors is not very large, and it is not necessarily beneficial to exclude any of them. Therefore, we argue that Ridge regression is well-suited for this particular dataset.
+
+## Evaluation of Ridge Regression Performance
+
+To evaluate the performance of the model, we use Mean Squared Error (MSE) and $R^2$ (coefficient of determination) as performance metrics.
+
+Mean Squared Error (MSE) measures the average of the squared differences between the actual and predicted values. It is calculated as:
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+where $y_i$ is the actual value and $\hat{y}_i$ is the predicted value. A low MSE indicates that the model’s predictions are close to the actual values, making it a useful measure of model accuracy.
+$R^2$ measures the proportion of the variance in the dependent variable that is explained by the model. 
+$$
+R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
+$$
+The $R^2$ value ranges from 0 to 1, where higher values indicate better explanatory power.  
+In this project, we evaluate model performance on the test data using both MSE and $R^2$.
 ```{r, eval=TRUE, echo=TRUE}
+# Predict Age on the test set
 ridge_pred <- predict(cv_ridge, s = best_lambda, newx = x_test)
+
 mse <- mean((y_test - ridge_pred)^2)
 r2 <- 1 - sum((y_test - ridge_pred)^2) / sum((y_test - mean(y_test))^2)
-
-cat("MSE:", mse, "\n")
-cat("R²:", r2, "\n")
 ```
 
-## Results and interpretation
+
+
+# Results and interpretation
 Evaluere modellene på testsettet.
 Sammenligne metodene – hvilken ga best resultater?
 Diskutere hvilke variabler som har størst betydning for prediksjon av alder.
+
+## Ridge Regression
+Using 10-fold cross-validation with `cv.glmnet()`, the optimal value for the shrinkage parameter $\lambda = 1.195248$.
+```{r, eval=TRUE, echo=TRUE}
+plot(cv_ridge)
+```
+The Ridge regression model achieved a test MSE $= 70.92$ and a coefficient of determination $R^2 = 0.27$. This means that, on average, the model's predictions are off by about $\sqrt{70.92} \approx 8$ years, and it explains roughly $27$% of the variation in age.
+
+This suggests that while some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
+
+Nevertheless, the results show that Ridge regression is able to capture some underlying patterns and performs as expected by helping to control overfitting. The relatively low $R^2$ also highlights the importance of variable selection and data quality when building predictive models.
 
 
 ## Summary
