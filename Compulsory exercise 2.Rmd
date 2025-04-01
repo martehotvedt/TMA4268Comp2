@@ -42,7 +42,6 @@ library("rmarkdown")
 
 <!--  Etc (load all packages needed). -->
 
-## Abstract
 
 
 ## Introduction: Scope and purpose of your project
@@ -56,8 +55,8 @@ data <- read.csv("heart.csv")
 
 
 
-## Methods
-We used the "Heart Failure Clinical Records" dataset and selected Age as the response variable. All other variables were used as predictors.
+# Methods
+We used the "Heart Failure Clinical Records" dataset and selected `Age` as the response variable. All other variables were used as predictors.
 Before we can apply the methods to the dataset, we need to split the data into training and test sets. Splitting the data ensures that we can train the model on one subset and evaluate its performance on unseen data, helping us assess how well the model generalizes. We randomly assign 70% of the data to the training set and the remaining 30% to the test set.
 ```{r, eval=TRUE, echo=TRUE}
 n <- nrow(data) # Number of observations
@@ -70,7 +69,7 @@ train_data <- data[train_idx, ]
 test_data <- data[-train_idx, ]
 ```
 
-# Multiple Linear Regression
+## Multiple Linear Regression
 
 In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of method was due to the fact that MLR is easy to interpret. We assume that 
 
@@ -156,6 +155,7 @@ set.seed(123)
 cv_ridge <- cv.glmnet(x_train, y_train, alpha = 0)
 best_lambda <- cv_ridge$lambda.min
 ```
+## Ridge Regression - Advantages and disadvantages
 Ridge regression is especially useful when two or more of the predictors are correlated with each other or when the number of predictors is large compared to the number of observations. The method helps prevent overfitting by adding just enough bias to make the model's estimates more stable and robust. It also helps reduce model complexity without completely removing variables.
 
 In our case, the most important advantages are that the method works well when the predictors are correlated. In our dataset, we can expect that variables such as `RestingBP`, `Cholesterol`, and `MaxHR` are related to each other. Additionally, Ridge regression is useful because we do not want to exclude any explanatory variables, but rather improve the precision of our predictions.
