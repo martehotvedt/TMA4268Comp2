@@ -1,21 +1,21 @@
 ---
-title: "Compulsory Exercise 2: Age Prediction for Heart Failure"
+title: 'Compulsory Exercise 2: Age Prediction for Heart Failure'
 author:
-- "Karianne Strand Bergem"
-- "Marte Ragnhild Hotvedt"
-- "Erlend Winje"
+- Karianne Strand Bergem
+- Marte Ragnhild Hotvedt
+- Erlend Henriksen Winje
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-header-includes: \usepackage{amsmath}
 output:
-  # html_document:
-  #   toc: no
-  #   toc_depth: '2'
-  #   df_print: paged
   pdf_document:
-    toc: no
+    toc: false
     toc_depth: '2'
+  html_document:
+    toc: false
+    toc_depth: '2'
+    df_print: paged
+header-includes: \usepackage{amsmath}
 urlcolor: blue
-abstract: "This is the place for your abstract (max 350 words)"
+abstract: This is the place for your abstract (max 350 words)
 ---
   
 ```{r setup, include=FALSE}
@@ -38,26 +38,107 @@ knitr::opts_chunk$set(echo = TRUE,
 ```{r, eval=TRUE, echo=FALSE}
 library("knitr")
 library("rmarkdown")
+library("readxl")
+library("ggplot2")
+library(dplyr)
+library(tidyr)
 ```
 
 <!--  Etc (load all packages needed). -->
 
-## Abstract
 
 
-## Introduction: Scope and purpose of your project
+# Introduction: Scope and purpose of your project
 Problemstillingen vår kan være om vi kan predikere alder basert på de variablene i Heart Failure-datasettet? Er det vi skal finne ut av liksom
 
-
-## Descriptive data analysis/statistics
+# Descriptive data analysis/statistics
 ```{r}
 data <- read.csv("heart.csv")
 ```
 
+To better understand the variables and their relationships, we perform descriptive data analysis on the heart failure dataset. Since our goal is to predict a person's age, we focus on identifying variables that might be relevant predictors.
 
+## Summary statistics
 
-## Methods
-We used the "Heart Failure Clinical Records" dataset and selected Age as the response variable. All other variables were used as predictors.
+```{r}
+# Mean, SD, Min, Max etc. across numeric variables
+
+# Summary statistics for numeric variables
+summary_stats <- data %>%
+  summarise(across(where(is.numeric), list(
+    Mean = ~mean(.),
+    Median = ~median(.),
+    SD   = ~sd(.),
+    Variance = ~var(.),
+    Min  = ~min(.),
+    Max  = ~max(.)
+  ), .names = "{.col}_{.fn}"))
+
+# Table format
+summary_stats_long <- summary_stats %>%
+  pivot_longer(cols = everything(),
+               names_to = c("Variable", "Statistic"),
+               names_sep = "_") %>%
+  pivot_wider(names_from = Statistic, values_from = value)
+
+kable(summary_stats_long, caption = "Summary statistics for the numeric variables")
+```
+The table above presents key statistics for all numeric variables. We observe, for example, that Age ranges from 28 to 77, and MaxHR (maximum heart rate) has a relatively high standard deviation, indicating strong variability between individuals. These values give an initial sense of scale, spread, and potential outliers in the data, which are important to consider before modeling.
+
+## Age distribution
+
+```{r}
+ggplot(data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+  labs(title = "Distribution of Age", x = "Age", y = "Count")
+```
+The distribution of Age is concentrated in the range 45–65, with a peak around 55 years. The distribution is roughly symmetric, with a few younger and older outliers. Since age is our target variable, this plot helps understand the range and whether any skew might influence model performance.
+
+## Correlation matrix
+
+```{r variable_correlations}
+numeric_vars <- data[sapply(data, is.numeric)]
+
+cor_matrix <- round(cor(numeric_vars), 4)
+
+kable(cor_matrix, caption = "Correlation matrix of numeric variables")
+```
+
+The correlation matrix above highlights the relationships between numeric variables. We see a moderate negative correlation between Age and MaxHR (-0.38), and a mild positive correlation between Age and Oldpeak (0.26). Other variables, such as Cholesterol and RestingBP, appear weakly correlated with age. This suggests that MaxHR and Oldpeak could be useful predictors. The correlation between Age and HeartDisease is also not negligible, and it may be a useful predictor.
+
+## Relationship between numeric variables and age
+
+Based on the correlation matrix, MaxHR and Oldpeak were the numeric variables most strongly related to age. While HeartDisease also appears as a numeric variable, it is a binary indicator and better treated as a categorical variable. Therefore, it was not included among the continuous variables explored through scatter plots, but rather in the analysis of the categorical variables.
+
+```{r}
+# Numeric variables, scatter plots
+ggplot(data, aes(x = Age, y = MaxHR)) + geom_point(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "MaxHR vs Age", x = "Age", y = "Max Heart Rate")
+
+ggplot(data, aes(x = Age, y = Oldpeak)) + geom_point(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Oldpeak vs Age", x = "Age", y = "Oldpeak")
+```
+
+The scatter plot of MaxHR against Age reveals a clear negative linear trend: as age increases, maximum heart rate tends to decrease. This is physiologically expected and supports using MaxHR as a predictor. Oldpeak shows a slight upward trend with age, indicating a mild positive association. Both variables are therefore potentially useful in predicting age.
+
+## Relationship between categorical variables and age
+
+To assess the relationship between categorical variables and age, we plotted boxplots for each one. ExerciseAngina and ST_Slope showed the most distinct group differences in age and were therefore chosen as the most relevant to include. HeartDisease is also included because of the results found in the correlation matrix. 
+
+```{r}
+# Categorical variables, box plots
+ggplot(data, aes(x = ExerciseAngina, y = Age)) + geom_boxplot() + labs(title = "Age by Exercise-Induced Angina", x = "Exercise Angina", y = "Age")
+ggplot(data, aes(x = ST_Slope, y = Age)) + geom_boxplot() + labs(title = "Age by ST Slope", x = "ST Slope", y = "Age")
+
+ggplot(data, aes(x = factor(HeartDisease), y = Age)) +
+  geom_boxplot() +
+  labs(title = "Age by Heart Disease Status", x = "Heart Disease (0 = No, 1 = Yes)", y = "Age")
+```
+
+In the boxplot for ExerciseAngina, we observe that patients with angina induced by exercise (Y) tend to be older than those without (N). Similarly, the boxplot for ST_Slope shows that patients with a “Down” slope tend to be older than those with a “Flat” or “Up” slope. These differences suggest that both variables are potentially informative for modeling age and may capture patterns related to heart diseases. The boxplot for HeartDisease shows that patients with heart disease tend to be older on average than those without. This supports the idea that age is associated with heart disease presence.
+
+# Methods
+We used the "Heart Failure Clinical Records" dataset and selected `Age` as the response variable. All other variables were used as predictors.
 Before we can apply the methods to the dataset, we need to split the data into training and test sets. Splitting the data ensures that we can train the model on one subset and evaluate its performance on unseen data, helping us assess how well the model generalizes. We randomly assign 70% of the data to the training set and the remaining 30% to the test set.
 ```{r, eval=TRUE, echo=TRUE}
 n <- nrow(data) # Number of observations
@@ -70,7 +151,7 @@ train_data <- data[train_idx, ]
 test_data <- data[-train_idx, ]
 ```
 
-# Multiple Linear Regression
+## Multiple Linear Regression
 
 In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of method was due to the fact that MLR is easy to interpret. We assume that 
 
@@ -156,6 +237,7 @@ set.seed(123)
 cv_ridge <- cv.glmnet(x_train, y_train, alpha = 0)
 best_lambda <- cv_ridge$lambda.min
 ```
+## Ridge Regression - Advantages and disadvantages
 Ridge regression is especially useful when two or more of the predictors are correlated with each other or when the number of predictors is large compared to the number of observations. The method helps prevent overfitting by adding just enough bias to make the model's estimates more stable and robust. It also helps reduce model complexity without completely removing variables.
 
 In our case, the most important advantages are that the method works well when the predictors are correlated. In our dataset, we can expect that variables such as `RestingBP`, `Cholesterol`, and `MaxHR` are related to each other. Additionally, Ridge regression is useful because we do not want to exclude any explanatory variables, but rather improve the precision of our predictions.
