@@ -120,6 +120,18 @@ anova(mlr_mod_small, mlr_mod)
 ```
 We observe a quite high $p$-value for the $F$-test, which means there is weak or even no evidence that the model gets better by including the coefficients with higher $p$-value than $0.05$. 
 
+```{r, eval=TRUE, echo=TRUE}
+# Model assessment
+mlr_pred <- predict(mlr_mod, test_data)
+mse_mlr <- mean((test_data$Age - mlr_pred)^2)
+mse_mlr
+
+r2_mlr <- 1 - sum((test_data$Age - mlr_pred)^2) / sum((test_data$Age - mean(test_data$Age))^2)
+r2_mlr
+
+```
+
+
 ## Ridge regression
 We now aim to predict `Age` using a different method, in order to compare the results with those obtained from multiple linear regression. We have chosen to use Ridge regression, both to gain a better understanding of this technique and to optimize the model through the use of a hyperparameter. 
 
