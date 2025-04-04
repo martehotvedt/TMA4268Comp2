@@ -251,19 +251,7 @@ In our case, the number of predictors is not very large, and it is not necessari
 
 ## Evaluation of Ridge Regression Performance
 
-To evaluate the performance of the model, we use Mean Squared Error (MSE) and $R^2$ (coefficient of determination) as performance metrics.
-
-Mean Squared Error (MSE) measures the average of the squared differences between the actual and predicted values. It is calculated as:
-$$
-\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
-$$
-where $y_i$ is the actual value and $\hat{y}_i$ is the predicted value. A low MSE indicates that the model’s predictions are close to the actual values, making it a useful measure of model accuracy.
-$R^2$ measures the proportion of the variance in the dependent variable that is explained by the model. 
-$$
-R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
-$$
-The $R^2$ value ranges from 0 to 1, where higher values indicate better explanatory power.  
-In this project, we evaluate model performance on the test data using both MSE and $R^2$.
+To evaluate the performance of the model, we use Mean Squared Error (MSE) and $R^2$ (coefficient of determination) as performance metrics, in the same way as we did with MLR.
 ```{r, eval=TRUE, echo=TRUE}
 # Predict Age on the test set
 ridge_pred <- predict(cv_ridge, s = best_lambda, newx = x_test)
@@ -271,7 +259,6 @@ ridge_pred <- predict(cv_ridge, s = best_lambda, newx = x_test)
 mse <- mean((y_test - ridge_pred)^2)
 r2 <- 1 - sum((y_test - ridge_pred)^2) / sum((y_test - mean(y_test))^2)
 ```
-
 
 
 # Results and interpretation
@@ -311,17 +298,68 @@ We do notice that not all $p$-values suggest significant coefficients. This mean
 The MLR obtained a test MSE and a coefficient of determination approximately equal to $64.12$ and $0.25$, respectively. The model measures on average a difference of $\sqrt{64.12} \approx 8$ years between the estimated values of $\texttt{Age}$ and the true value. In addition, $25\%$ variability in the data is explained by the model.
 
 ## Ridge Regression
-Using 10-fold cross-validation with `cv.glmnet()`, the optimal value for the shrinkage parameter $\lambda = 1.195248$.
-```{r, eval=TRUE, echo=TRUE}
-plot(cv_ridge)
+To assess which variables have the greatest impact on the model's predictions, we can examine the magnitude of the coefficients in the Ridge regression model. Since Ridge does not set any coefficients exactly to zero, all predictors are included in the model, although some have a much stronger effect than others.
+```{r, eval=TRUE, echo=FALSE}
+ridge_coefs <- coef(cv_ridge, s = "lambda.min")
 ```
+
+```{r, eval=TRUE, echo=FALSE}
+# install.packages("ggplot2")
+library(ggplot2)
+
+ridge_coefs_df <- as.data.frame(as.matrix(ridge_coefs))
+ridge_coefs_df$variable <- rownames(ridge_coefs_df)
+colnames(ridge_coefs_df)[1] <- "coefficient"
+
+ridge_coefs_df <- ridge_coefs_df[ridge_coefs_df$variable != "(Intercept)", ]
+
+ridge_coefs_df$abs_coef <- abs(ridge_coefs_df$coefficient)
+
+ridge_plot <- ggplot(ridge_coefs_df, aes(x = reorder(variable, abs_coef), y = coefficient)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Ridge regression coefficients",
+       x = "Variable",
+       y = "Coefficient value") +
+  theme_minimal()
+```
+
+```{r, echo=FALSE}
+ridge_plot
+```
+The variables with the largest absolute coefficients are those that influence age the most in the model, as you can see in the figure.
+`RestingECGNormal` (negative effect), `FastingBS` (positive effect) and `ChestPainTypeNAP` (positive effect) appeared to have the greatest influence. A positive effect means that as the value of the variable increases, the predicted value of the response variable also increases. The opposite is true for a negative effect.
+
+
+
+
+Using 10-fold cross-validation with `cv.glmnet()`, the optimal value for the shrinkage parameter $\lambda = 1.195248$. This means that the model performed best, on average, when using this value for $\lambda$.
+```{r, eval=TRUE, echo=FALSE}
+plot_cv_ridge <- plot(cv_ridge)
+```
+The figure shows the average Mean Squared Error (MSE) across different values of $\lambda$, with the horizontal axis representing $\log(\lambda)$. The red curve represents the average MSE for each value of $\lambda$, while the grey lines illustrate the standard error.
+
+The optimal value of $\lambda$, i.e., the one that yields the lowest average cross-validated MSE, is in this case $\log(1.195248) \approx 0.18$, which indicates that the model performs best with a moderate amount of regularization.
+
 The Ridge regression model achieved a test MSE $= 70.92$ and a coefficient of determination $R^2 = 0.27$. This means that, on average, the model's predictions are off by about $\sqrt{70.92} \approx 8$ years, and it explains roughly $27$% of the variation in age.
 
-This suggests that while some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
+While some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
 
 Nevertheless, the results show that Ridge regression is able to capture some underlying patterns and performs as expected by helping to control overfitting. The relatively low $R^2$ also highlights the importance of variable selection and data quality when building predictive models.
 
+
 ## Model Selection
+
+Both models achieved relatively similar results on the test set, with an average prediction error of approximately 8 years. Ridge regression resulted in a slightly higher $MSE$ ($70.92$ vs. $64.12$), but also a marginally better explanatory power measured by $R^2$ ($0.27$ vs. $0.25$). This suggests that Ridge is able to capture slightly more of the variation in age, although the improvement is modest.
+
+Multiple Linear Regression (MLR) can be sensitive when predictor variables are correlated — which can lead to high variance and unstable coefficient estimates. Ridge Regression addresses this by adding a penalty for large coefficients, which reduces variance and makes the model more robust to new data. This comes at the cost of a small increase in bias, but overall provides better generalization.
+
+MLR is easy to interpret, particularly when it comes to understanding the effect of each individual predictor. Ridge Regression, on the other hand, is less interpretable, as all variables are retained in the model and the coefficients are jointly adjusted.
+
+Since the dataset contains several predictors that are partially correlated, and we do not wish to exclude any variables, Ridge Regression is a reasonable choice. It provides better control over overfitting and handles multicollinearity effectively. When the goal is accurate prediction rather than interpretation of individual coefficients, Ridge is preferred over MLR.
+
 
 
 ## Summary
+
+Both models provide a reasonable prediction of age, but neither MLR nor Ridge achieves high precision. This indicates that the dataset does not contain strong predictors of age on its own. Nevertheless, Ridge Regression offers slightly better generalization and is therefore the preferred choice in this context.
