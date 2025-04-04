@@ -162,11 +162,10 @@ We assume that
 $$\mathbf{Y} = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_p X_p + \epsilon,$$
 where $\mathbf{Y}$ is a $(n \times 1)$-vector of responses ($\texttt{Age}$), $X_j$ is the $j^{\text{th}}$ predictor, and $\beta_j$ is the respective coefficient. From det data set, we have $n = 918$ patienst $(x_{1i}, \dots, x_{pi}, y_i), 1 \leq i \leq n$, with $p=15$ attributes for each patient. $\epsilon$ is a $(n \times 1)$-vector of random errors. We assume that $E(\epsilon_i) = 0$, that all $\epsilon_i$ have the same variance, and that $\epsilon_i$ are independent of each other and normally distributed. 
 
-To solve the prediction of age by using MLR, we use the $\texttt{lm()}$-function to estimate the regression coefficients $\beta$:
+To solve the prediction of age by using MLR, we use the $\texttt{lm()}$-function to estimate the regression coefficients $\beta$.
 
 ```{r, eval = TRUE, echo = TRUE}
 mlr_mod <- lm(Age ~ ., data = train_data)
-summary(mlr_mod)
 ```
 
 First, we need to check that that the model assumptions of a MLR actually hold. To check this we may use the model checking tools Tukey-Anscombe diagram \ref{fig:tukey-anscombe} and the QQ-diagram \ref{fig:qq}. 
@@ -292,8 +291,15 @@ r2 <- 1 - sum((y_test - ridge_pred)^2) / sum((y_test - mean(y_test))^2)
 Evaluere modellene på testsettet.
 Sammenligne metodene – hvilken ga best resultater?
 Diskutere hvilke variabler som har størst betydning for prediksjon av alder.
+Diskutere bias-variance tradeoff.
 
 ## Multiple Linear Regression
+The MLR using the $\texttt{lm()}$-function is summarized in Figure \ref{fig:summary}.
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="Summary of the MLR using the $\texttt{lm}()$-function.", summary}
+summary(mlr_mod)
+```
+
 The MLR obtained a test MSE and a coefficient of determination approximately equal to $64.12$ and $0.25$, respectively. The model measures on average a difference of $\sqrt{64.12} \approx 8$ years between the estimated values of $\texttt{Age}$ and the true value. In addition, $25\%$ variability in the data is explained by the model.
 
 ## Ridge Regression
