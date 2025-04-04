@@ -167,11 +167,19 @@ mlr_mod <- lm(Age ~ ., data = train_data)
 summary(mlr_mod)
 ```
 
-First, we need to check that that the model assumptions of a MLR actually hold. To check this we may use the model checking tools Tukey-Anscombe diagram and the QQ-diagram. 
+First, we need to check that that the model assumptions of a MLR actually hold. To check this we may use the model checking tools Tukey-Anscombe diagram \ref{fig:tukey-anscombe} and the QQ-diagram \ref{fig:qq}. 
 
-```{r, eval = TRUE, echo = FALSE}
-plot(mlr_mod, which = c(1,2))
+```{r, eval = TRUE, echo = FALSE, fig.cap="Tukey-Anscombe Diagram.", tukey-anscombe}
+plot(mlr_mod, which = c(1))
 ```
+
+We observe that the residuals seem to be spread around a horizontal line and with no particular pattern. This indicates that the there is a linear relationship between the $\texttt{Age}$ and the covariates, which we assume in MLR. We also notice that the residuals are spread around zero, which we assumed to be the mean value. In addition, it seems that the residuals have the same variance approximately being $\sqrt{20}$.
+
+```{r, eval = TRUE, echo = FALSE, fig.cap="QQ-Diagram.", qq}
+plot(mlr_mod, which = c(2))
+```
+
+We observe that the points approximately seem to follow a straight line, which indicates that the data are fairly normally distributed. We can conclude with the that the model assumptions are fulfilled and that we may use MLR on this dataset. 
 
 To get an idea of which the predictors $X_1, \dots, X_n$ are useful in predicting the response, we check if we could as well omit all predictor variables at the same time. We formulate the test as 
 
@@ -181,22 +189,11 @@ H_0: \beta_1 = \beta_2 & = \dots = \beta_p = 0  \\
 H_1: \text{at least } & \text{one } \beta_j \text{ is non-zero.} 
 \end{align*}
 
-If $H_0$ is true, the $F$-statistics is expected to be $\approx 1$. We observe from the R output that the $F$ is higher than $1$ and that the respective $p$-value is very small, which means the predictors are useful in predicting the response. This also coincides with the $p$-values for the estimates of the $\beta$-coefficients. However, we do notice that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. To check this we can reformulate the test to 
+If $H_0$ is true, the $F$-statistics is expected to be $\approx 1$. We observe from the R output that the $F$ is higher than $1$ and that the respective $p$-value is very small, which means the predictors are useful in predicting the response. This also coincides with the $p$-values for the estimates of the $\beta$-coefficients. 
 
-\begin{align*}
-H_0: \beta_1 = \beta_2 & = \dots = \beta_q = 0  \\
-&\text{vs.} \\
-H_1: \text{at least } & \text{one } \beta_j \text{ is non-zero,} 
-\end{align*}
+We do notice that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. We could try to reformulate the test to test whether just some predictors are useful. In addition, we could try to extend the model to also consider interactions and non-linear terms. However, we would like to compare MLR to another model (Ridge regression), thus we will continue with the full model.
 
-where $q$ is the number of coefficients $\beta_j$ we want to test. We want to test if we can omit the coefficients with $p$-values higher than $0.05$. To do this, we can perform the test by the $\texttt{anova()}$-function:
-
-```{r, eval = TRUE, echo = TRUE}
-mlr_mod_small <- lm(Age ~ ChestPainType + RestingBP + FastingBS + RestingECG 
-                    + MaxHR + Oldpeak + ST_Slope, data = train_data)
-anova(mlr_mod_small, mlr_mod)
-```
-We observe a quite high $p$-value for the $F$-test, which means there is weak or even no evidence that the model gets better by including the coefficients with higher $p$-value than $0.05$. 
+To do the model selection between MLR and Ridge regression in a valid way, we evalutate the model performance by MSE and R^2.
 
 ```{r, eval=TRUE, echo=TRUE}
 # Model assessment
