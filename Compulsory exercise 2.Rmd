@@ -44,7 +44,6 @@ library(dplyr)
 library(tidyr)
 ```
 
-<!--  Etc (load all packages needed). -->
 
 
 
