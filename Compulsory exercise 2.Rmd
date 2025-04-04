@@ -153,14 +153,16 @@ test_data <- data[-train_idx, ]
 
 # Multiple Linear Regression
 
-In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of algorithm was due to the fact that MLR is easy to interpret. Another strength of using this method is its ability to extend to bivariate and categorical covariates. This suits the covariates we are evaluating, such as $\texttt{Sex}$ and $\texttt{ChestPainType}$. With MLR we can also consider interaction and non-linear terms. However, a weakness of MLR is occurrence of collinearity when two or more predictors are correlated. This result in a reduces accuracy of the estimated regression.
+In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of algorithm was due to the fact that MLR is easy to interpret. Another strength of using this method is its ability to extend to bivariate and categorical covariates. This suits the covariates we are evaluating, such as $\texttt{Sex}$ and $\texttt{ChestPainType}$. With MLR we can also consider interaction and non-linear terms. However, a weakness of MLR is occurrence of collinearity when two or more predictors are correlated. This result in a reduced accuracy of the estimated regression.
+
+## Model Assumptions
 
 We assume that 
 
 $$\mathbf{Y} = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_p X_p + \epsilon,$$
 where $\mathbf{Y}$ is a $(n \times 1)$-vector of responses ($\texttt{Age}$), $X_j$ is the $j^{\text{th}}$ predictor, and $\beta_j$ is the respective coefficient. From det data set, we have $n = 918$ patienst $(x_{1i}, \dots, x_{pi}, y_i), 1 \leq i \leq n$, with $p=15$ attributes for each patient. $\epsilon$ is a $(n \times 1)$-vector of random errors. We assume that $E(\epsilon_i) = 0$, that all $\epsilon_i$ have the same variance, and that $\epsilon_i$ are independent of each other and normally distributed. 
 
-To solve the prediction of age by using MLR, we first use the $\texttt{lm()}$-function to estimate the regression coefficients $\beta$:
+To solve the prediction of age by using MLR, we use the $\texttt{lm()}$-function to estimate the regression coefficients $\beta$:
 
 ```{r, eval = TRUE, echo = TRUE}
 mlr_mod <- lm(Age ~ ., data = train_data)
@@ -179,7 +181,10 @@ We observe that the residuals seem to be spread around a horizontal line and wit
 plot(mlr_mod, which = c(2))
 ```
 
+\newpage
 We observe that the points approximately seem to follow a straight line, which indicates that the data are fairly normally distributed. We can conclude with the that the model assumptions are fulfilled and that we may use MLR on this dataset. 
+
+## Evaluation of Multiple Linear Regression Performance
 
 To get an idea of which the predictors $X_1, \dots, X_n$ are useful in predicting the response, we check if we could as well omit all predictor variables at the same time. We formulate the test as 
 
@@ -193,19 +198,27 @@ If $H_0$ is true, the $F$-statistics is expected to be $\approx 1$. We observe f
 
 We do notice that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. We could try to reformulate the test to test whether just some predictors are useful. In addition, we could try to extend the model to also consider interactions and non-linear terms. However, we would like to compare MLR to another model (Ridge regression), thus we will continue with the full model.
 
-To do the model selection between MLR and Ridge regression in a valid way, we evalutate the model performance by MSE and R^2.
+To do the model selection between MLR and Ridge regression, we evaluate the model performance by Mean Squared Error (MSE) and $R^2$ (coefficient of determination). We use the test set to do this in a valid way. MSE measures the average of the squared differences between the actual and predicted values. It is calculated as:
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+where $y_i$ is the actual value and $\hat{y}_i$ is the predicted value. A low MSE indicates that the model’s predictions are close to the actual values, making it a useful measure of model accuracy.
+$R^2$ measures the proportion of the variance in the dependent variable that is explained by the model. 
+$$
+R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
+$$
+The $R^2$ value ranges from 0 to 1, where higher values indicate better explanatory power.
 
 ```{r, eval=TRUE, echo=TRUE}
 # Model assessment
 mlr_pred <- predict(mlr_mod, test_data)
 mse_mlr <- mean((test_data$Age - mlr_pred)^2)
-mse_mlr
 
 r2_mlr <- 1 - sum((test_data$Age - mlr_pred)^2) / sum((test_data$Age - mean(test_data$Age))^2)
-r2_mlr
 ```
 
-## Ridge regression
+
+# Ridge regression
 We now aim to predict `Age` using a different method, in order to compare the results with those obtained from multiple linear regression. We have chosen to use Ridge regression, both to gain a better understanding of this technique and to optimize the model through the use of a hyperparameter. 
 
 Ridge Regression is an extension of linear regression that includes a penalty for large coefficient values. The goal is to reduce model variance and improve generalization. Instead of minimizing only the Residual Sum of Squares (RSS), Ridge adds an additional term to the loss function:
@@ -280,6 +293,9 @@ Evaluere modellene på testsettet.
 Sammenligne metodene – hvilken ga best resultater?
 Diskutere hvilke variabler som har størst betydning for prediksjon av alder.
 
+## Multiple Linear Regression
+The MLR obtained a test MSE and a coefficient of determination approximately equal to $64.12$ and $0.25$, respectively. The model measures on average a difference of $\sqrt{64.12} \approx 8$ years between the estimated values of $\texttt{Age}$ and the true value. In addition, $25\%$ variability in the data is explained by the model.
+
 ## Ridge Regression
 Using 10-fold cross-validation with `cv.glmnet()`, the optimal value for the shrinkage parameter $\lambda = 1.195248$.
 ```{r, eval=TRUE, echo=TRUE}
@@ -290,6 +306,8 @@ The Ridge regression model achieved a test MSE $= 70.92$ and a coefficient of de
 This suggests that while some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
 
 Nevertheless, the results show that Ridge regression is able to capture some underlying patterns and performs as expected by helping to control overfitting. The relatively low $R^2$ also highlights the importance of variable selection and data quality when building predictive models.
+
+## Model Selection
 
 
 ## Summary
