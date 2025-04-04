@@ -261,11 +261,8 @@ r2 <- 1 - sum((y_test - ridge_pred)^2) / sum((y_test - mean(y_test))^2)
 ```
 
 
-# Results and interpretation
-Evaluere modellene på testsettet.
-Sammenligne metodene – hvilken ga best resultater?
-Diskutere hvilke variabler som har størst betydning for prediksjon av alder.
-Diskutere bias-variance tradeoff.
+# Results and Interpretation
+In this section, we will display the results of the methods on the training set and the evaluation of their performance using the test set. We will interpret the results and compare the models of which obtained the best results. In addition, we will discuss which variables had the highest impact on the prediction of age. The bias-variance trade off will also be taken into account.
 
 ## Multiple Linear Regression
 The MLR using the $\texttt{lm()}$-function is summarized in the following.
@@ -348,13 +345,13 @@ Nevertheless, the results show that Ridge regression is able to capture some und
 
 ## Model Selection
 
-Both models achieved relatively similar results on the test set, with an average prediction error of approximately 8 years. Ridge regression resulted in a slightly higher $MSE$ ($70.92$ vs. $64.12$), but also a marginally better explanatory power measured by $R^2$ ($0.27$ vs. $0.25$). This suggests that Ridge is able to capture slightly more of the variation in age, although the improvement is modest.
+Both models achieved relatively similar results on the test set, with an average prediction error of approximately 8 years. Ridge regression resulted in a slightly higher MSE ($70.92$ vs. $64.12$), but also a marginally better explanatory power measured by $R^2$ ($0.27$ vs. $0.25$). This suggests that Ridge is able to capture slightly more of the variation in age, although the improvement is modest.
 
-Multiple Linear Regression (MLR) can be sensitive when predictor variables are correlated — which can lead to high variance and unstable coefficient estimates. Ridge Regression addresses this by adding a penalty for large coefficients, which reduces variance and makes the model more robust to new data. This comes at the cost of a small increase in bias, but overall provides better generalization.
+MLR can be sensitive when predictor variables are correlated — which can lead to high variance and unstable coefficient estimates. Ridge Regression addresses this by adding a penalty for large coefficients, which reduces variance and makes the model more robust to new data. This comes at the cost of a small increase in bias, but overall provides better generalization.
 
 MLR is easy to interpret, particularly when it comes to understanding the effect of each individual predictor. Ridge Regression, on the other hand, is less interpretable, as all variables are retained in the model and the coefficients are jointly adjusted.
 
-Since the dataset contains several predictors that are partially correlated, and we do not wish to exclude any variables, Ridge Regression is a reasonable choice. It provides better control over overfitting and handles multicollinearity effectively. When the goal is accurate prediction rather than interpretation of individual coefficients, Ridge is preferred over MLR.
+Since the data set contains several predictors that are partially correlated, and we do not wish to exclude any variables, Ridge Regression is a reasonable choice. It provides better control over overfitting and handles multicollinearity effectively. When the goal is accurate prediction rather than interpretation of individual coefficients, Ridge is preferred over MLR.
 
 
 
