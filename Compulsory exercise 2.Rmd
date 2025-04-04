@@ -187,9 +187,9 @@ where $\text{TSS}$ is the total sum of squares and $\text{RSS}$ is the residual 
 
 To do the model selection between MLR and Ridge regression, we evaluate the model performance by Mean Squared Error (MSE) and $R^2$ (coefficient of determination). We use the test set to do this in a valid way. MSE measures the average of the squared differences between the actual and predicted values. It is calculated as:
 $$
-\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+\text{MSE} = \frac{1}{n} \sum_{i=n+1}^{n+q} (y_i - \hat{y}_i)^2
 $$
-where $y_i$ is the actual value and $\hat{y}_i$ is the predicted value. A low MSE indicates that the model’s predictions are close to the actual values, making it a useful measure of model accuracy.
+where $y_i$ is the actual value, $\hat{y}_i$ is the predicted value, and $q$ is the number of patients in the test set. A low MSE indicates that the model’s predictions are close to the actual values, making it a useful measure of model accuracy.
 $R^2$ measures the proportion of the variance in the dependent variable that is explained by the model. 
 $$
 R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
