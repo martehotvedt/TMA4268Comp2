@@ -343,8 +343,6 @@ The optimal value of $\lambda$, i.e., the one that yields the lowest average cro
 
 The Ridge regression model achieved a test MSE $= 70.92$ and a coefficient of determination $R^2 = 0.27$. This means that, on average, the model's predictions are off by about $\sqrt{70.92} \approx 8$ years, and it explains roughly $27$% of the variation in age.
 
-While some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
-
 Nevertheless, the results show that Ridge regression is able to capture some underlying patterns and performs as expected by helping to control overfitting. The relatively low $R^2$ also highlights the importance of variable selection and data quality when building predictive models.
 
 
@@ -362,4 +360,5 @@ Since the dataset contains several predictors that are partially correlated, and
 
 ## Summary
 
-Both models provide a reasonable prediction of age, but neither MLR nor Ridge achieves high precision. This indicates that the dataset does not contain strong predictors of age on its own. Nevertheless, Ridge Regression offers slightly better generalization and is therefore the preferred choice in this context.
+Both models provide a reasonable prediction of age, but neither MLR nor Ridge achieves high precision. While some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
+Nevertheless, Ridge Regression offers slightly better generalization and is therefore the preferred choice in this context.
