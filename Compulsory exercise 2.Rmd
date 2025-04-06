@@ -56,7 +56,7 @@ library(tidyr)
 
 
 
-# Introduction: Scope and purpose of your project
+# Introduction
 
 In this project, we aim to predict a person’s age using clinical and physiological variables from the Heart Failure Prediction dataset, originally published on Kaggle by Fedesoriano [Fedesoriano, 2021]. Although commonly applied to heart disease classification, we approach it here as a regression task.
 
@@ -193,10 +193,10 @@ H_0: \beta_1 = \beta_2 & = \dots = \beta_p = 0  \\
 H_1: \text{at least } & \text{one } \beta_j \text{ is non-zero.} 
 \end{align*}
 
-We used $F$-statistics to do this test,
+We used $F$-statistics to perform this test,
 
 $$ F = \frac{(\text{TSS} - \text{RSS})/p}{\text{RSS}/(n - p - 1)} \sim F_{p, (n - p - 1)},$$
-where $\text{TSS}$ is the total sum of squares and $\text{RSS}$ is the residual sum of squares. Under the assumptions we have made, $F$ follows an $F_{p, (n - p - 1)}$-distribution. The $\texttt{lm()}$-function calculates the $F$-statistics. If $H_0$ is true, the $F$-statistics is expected to be $\approx 1$.
+where $\text{TSS}$ is the total sum of squares and $\text{RSS}$ is the residual sum of squares. Under the assumptions we have made, $F$ follows an $F_{p, (n - p - 1)}$-distribution. The $\texttt{lm()}$-function calculates the $F$-statistics. If $H_0$ is true, we expect the $F$-statistics to be approximately equal to $1$ [Muff, 2025].
 
 To do the model selection between MLR and Ridge regression, we evaluate the model performance by Mean Squared Error (MSE) and $R^2$ (coefficient of determination). We use the test set to do this in a valid way. MSE measures the average of the squared differences between the actual and predicted values. It is calculated as:
 $$
@@ -285,6 +285,8 @@ The MLR using the $\texttt{lm()}$-function is summarized in the following.
 summary(mlr_mod)
 ```
 
+We observe that there are just some of the estimated regression coefficients with small $p$-values, indicating that these may be useful in predicting age. The intercept seems to be quite important in the prediction, and so does $\texttt{RestingBP}$, $\texttt{RestingECGNormal}$, and $\texttt{MaxHR}$.
+
 ### Checking Model Assumptions 
 The model checking tools Tukey-Anscombe diagram and the QQ-diagram gave the following plots shown in the Figures \ref{fig:tukey-anscombe} and \ref{fig:qq}.
 
@@ -292,19 +294,19 @@ The model checking tools Tukey-Anscombe diagram and the QQ-diagram gave the foll
 plot(mlr_mod, which = c(1))
 ```
 
-We observe that the residuals seem to be spread around a horizontal line and with no particular pattern. This indicates that the there is a linear relationship between the $\texttt{Age}$ and the covariates, which we assume in MLR. We also notice that the residuals are spread around zero, which we assumed to be the mean value. In addition, it seems that the residuals have the same variance approximately being $\sqrt{20}$.
+We observe in Figure \ref{fig:tukey-anscombe} that the residuals seem to be spread around a horizontal line with no particular pattern. This indicates that the there is a linear relationship between the $\texttt{Age}$ and the covariates, which we assume in MLR. We also notice that the residuals are spread around zero, which we assumed to be the mean value. In addition, it seems that the residuals have the same variance approximately being $\sqrt{20}$.
 
 ```{r, eval = TRUE, echo = FALSE, fig.cap="QQ-Diagram.", qq}
 plot(mlr_mod, which = c(2))
 ```
 
-We observe that the points approximately seem to follow a straight line, which indicates that the data are fairly normally distributed. We can conclude with the that the model assumptions are fulfilled and that we may use MLR on this dataset.
+We observe in Figure \ref{fig:qq} that the points approximately seem to follow a straight line, which indicates that the data are normally distributed. We can conclude with the that the model assumptions are fulfilled and that we may use MLR on this data set.
 
 ### Evaluation of the Muliple Linear Regression
 
 The $F$-test is shown in the summary of the MLR. We observe from the R output that the $F$ is higher than $1$ and that the respective $p$-value is very small, which means the predictors are useful in predicting the response. This also coincides with the $p$-values for the estimates of the $\beta$-coefficients. 
 
-We do notice that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. We could try to reformulate the test to check whether just some predictors are useful. In addition, we could try to extend the model to also consider interactions and non-linear terms. However, we would like to compare MLR to another model (Ridge regression), thus we will continue with the full model.
+We have already noticed that not all $p$-values suggest significant coefficients. This means that perhaps only a subset of the predictors are useful. We could try to reformulate the test to check whether just some predictors are useful. In addition, we could try to extend the model to also consider interactions and non-linear terms. However, we would like to compare MLR to another model (Ridge regression), thus we will continue with the full model.
 
 The MLR obtained a test MSE and a coefficient of determination approximately equal to $64.12$ and $0.25$, respectively. The model measures on average a difference of $\sqrt{64.12} \approx 8$ years between the estimated values of $\texttt{Age}$ and the true value. In addition, $25\%$ variability in the data is explained by the model.
 
@@ -341,9 +343,7 @@ ridge_plot
 The variables with the largest absolute coefficients are those that influence age the most in the model, as you can see in the figure.
 `RestingECGNormal` (negative effect), `FastingBS` (positive effect) and `ChestPainTypeNAP` (positive effect) appeared to have the greatest influence. A positive effect means that as the value of the variable increases, the predicted value of the response variable also increases. The opposite is true for a negative effect.
 
-
-
-
+### Optimal Value of the Shrinkage Parameter
 Using 10-fold cross-validation with `cv.glmnet()`, the optimal value for the shrinkage parameter $\lambda = 1.195248$. This means that the model performed best, on average, when using this value for $\lambda$.
 ```{r, eval=TRUE, echo=FALSE}
 plot_cv_ridge <- plot(cv_ridge)
@@ -352,6 +352,7 @@ The figure shows the average Mean Squared Error (MSE) across different values of
 
 The optimal value of $\lambda$, i.e., the one that yields the lowest average cross-validated MSE, is in this case $\log(1.195248) \approx 0.18$, which indicates that the model performs best with a moderate amount of regularization.
 
+### Evaluation of the Ridge Regression
 The Ridge regression model achieved a test MSE $= 70.92$ and a coefficient of determination $R^2 = 0.27$. This means that, on average, the model's predictions are off by about $\sqrt{70.92} \approx 8$ years, and it explains roughly $27$% of the variation in age.
 
 Nevertheless, the results show that Ridge regression is able to capture some underlying patterns and performs as expected by helping to control overfitting. The relatively low $R^2$ also highlights the importance of variable selection and data quality when building predictive models.
@@ -378,4 +379,6 @@ Nevertheless, Ridge Regression offers slightly better generalization and is ther
 ## References
 
 Fedesoriano. (2021). *Heart Failure Prediction Dataset*. Kaggle. https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
+
+Muff, S. (2025). Module 3: Linear Regression. *TMA4268 Statistical Learning*. Available at: https://github.com/stefaniemuff/statlearning2/blob/main/3LinReg/3LinReg.pdf (visited on 6th Apr. 2025)
 
