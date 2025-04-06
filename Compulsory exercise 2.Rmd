@@ -15,7 +15,16 @@ output:
     df_print: paged
 header-includes: \usepackage{amsmath}
 urlcolor: blue
-abstract: This is the place for your abstract (max 350 words)
+abstract: >
+  This project explores a regression task using the Heart Failure Prediction dataset, published by Fedesoriano on Kaggle. While the dataset is often used for heart disease classification, we use it to estimate a person’s age based on clinical and physiological measurements, treating age as the response variable and all other features as predictors.
+
+  We apply and compare two statistical learning methods: multiple linear regression (MLR) and ridge regression. The goal is to assess how regularization in ridge affects prediction accuracy and model complexity, compared to the more interpretable baseline provided by MLR. We split the dataset into a 70% training set and a 30% test set to evaluate model performance.
+
+  Prior to modeling, we conduct descriptive analysis to examine distributions, correlations, and variable relevance. Some features, such as maximum heart rate and exercise-induced angina, show moderate association with age, but no single variable is strongly predictive.
+
+  Model assumptions for MLR are checked using diagnostic plots. Both models are evaluated using Mean Squared Error (MSE) and the coefficient of determination (R²) on the test set. Results show that neither model achieves high predictive accuracy, with both yielding a root MSE around 8 years and R² below 0.3. Ridge regression generalizes slightly better due to its handling of multicollinearity.
+
+  These results suggest that, while age can be partially predicted from the available features, accurate estimations are challenging with this dataset.
 ---
   
 ```{r setup, include=FALSE}
@@ -48,7 +57,12 @@ library(tidyr)
 
 
 # Introduction: Scope and purpose of your project
-Problemstillingen vår kan være om vi kan predikere alder basert på de variablene i Heart Failure-datasettet? Er det vi skal finne ut av liksom
+
+In this project, we aim to predict a person’s age using clinical and physiological variables from the Heart Failure Prediction dataset, originally published on Kaggle by Fedesoriano [Fedesoriano, 2021]. Although commonly applied to heart disease classification, we approach it here as a regression task.
+
+The response variable is Age, and all other available variables are used as predictors. Our goal is to compare the performance of multiple linear regression (MLR) and ridge regression in predicting age, and to explore how regularization impacts model accuracy and complexity. We split the dataset into training and test sets to evaluate the models in a valid way.
+
+The purpose of this project is to apply statistical learning methods covered in the course to a real dataset, and to assess which modeling approach is more suitable in this context. The analysis includes model building, assumption checking, performance evaluation, and a brief investigation of the most influential predictors. Our primary focus in this project is on prediction quality.
 
 # Descriptive data analysis/statistics
 ```{r}
@@ -152,14 +166,14 @@ test_data <- data[-train_idx, ]
 
 # Multiple Linear Regression
 
-In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure data set. This choice of algorithm was due to the fact that MLR is easy to interpret. Another strength of using this method is its ability to extend to bivariate and categorical covariates. This suits the covariates we are evaluating, such as $\texttt{Sex}$ and $\texttt{ChestPainType}$. With MLR we can also consider interaction and non-linear terms. However, a weakness of MLR is occurrence of collinearity when two or more predictors are correlated. This result in a reduced accuracy of the estimated regression.
+In this section, we will consider Multiple Linear Regression (MLR) as a method to predict age for the heart failure dataset. This choice of algorithm was due to the fact that MLR is easy to interpret. Another strength of using this method is its ability to extend to bivariate and categorical covariates. This suits the covariates we are evaluating, such as $\texttt{Sex}$ and $\texttt{ChestPainType}$. With MLR we can also consider interaction and non-linear terms. However, a weakness of MLR is occurrence of collinearity when two or more predictors are correlated. This result in a reduced accuracy of the estimated regression.
 
 ## Model Assumptions
 
 First, we will consider the training data and assume that 
 
 $$\mathbf{Y} = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_p X_p + \epsilon,$$
-where $\mathbf{Y}$ is a $(n \times 1)$-vector of responses ($\texttt{Age}$), $X_j$ is the $j^{\text{th}}$ predictor, and $\beta_j$ is the respective coefficient. From the training data set, we have $n = 643$ patients, that is, $643$ sampling units $(x_{1i}, \dots, x_{pi}, y_i), 1 \leq i \leq n$, with $p=15$ attributes for each patient. $\epsilon$ is a $(n \times 1)$-vector of random errors. We assume that $E(\epsilon_i) = 0$, that all $\epsilon_i$ have the same variance, and that $\epsilon_i$ are independent of each other and normally distributed. 
+where $\mathbf{Y}$ is a $(n \times 1)$-vector of responses ($\texttt{Age}$), $X_j$ is the $j^{\text{th}}$ predictor, and $\beta_j$ is the respective coefficient. From the training dataset, we have $n = 643$ patients, that is, $643$ sampling units $(x_{1i}, \dots, x_{pi}, y_i), 1 \leq i \leq n$, with $p=15$ attributes for each patient. $\epsilon$ is a $(n \times 1)$-vector of random errors. We assume that $E(\epsilon_i) = 0$, that all $\epsilon_i$ have the same variance, and that $\epsilon_i$ are independent of each other and normally distributed. 
 
 To solve the prediction of age by using MLR, we used the $\texttt{lm()}$-function to estimate the regression coefficients $\beta$.
 
@@ -351,11 +365,17 @@ MLR can be sensitive when predictor variables are correlated — which can lead 
 
 MLR is easy to interpret, particularly when it comes to understanding the effect of each individual predictor. Ridge Regression, on the other hand, is less interpretable, as all variables are retained in the model and the coefficients are jointly adjusted.
 
-Since the data set contains several predictors that are partially correlated, and we do not wish to exclude any variables, Ridge Regression is a reasonable choice. It provides better control over overfitting and handles multicollinearity effectively. When the goal is accurate prediction rather than interpretation of individual coefficients, Ridge is preferred over MLR.
+Since the dataset contains several predictors that are partially correlated, and we do not wish to exclude any variables, Ridge Regression is a reasonable choice. It provides better control over overfitting and handles multicollinearity effectively. When the goal is accurate prediction rather than interpretation of individual coefficients, Ridge is preferred over MLR.
 
 
 
-## Summary
+# Summary
 
 Both models provide a reasonable prediction of age, but neither MLR nor Ridge achieves high precision. While some variables are somewhat related to age, the dataset is not particularly well-suited for accurate age prediction. This is perhaps not surprising, as many of the variables (e.g., blood pressure, cholesterol, etc.) are influenced by both age and numerous other factors — and there is no variable in the dataset that directly indicates age. One way to improve the model would be to add predictors that are strongly correlated with age.
 Nevertheless, Ridge Regression offers slightly better generalization and is therefore the preferred choice in this context.
+
+
+## References
+
+Fedesoriano. (2021). *Heart Failure Prediction Dataset*. Kaggle. https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
+
