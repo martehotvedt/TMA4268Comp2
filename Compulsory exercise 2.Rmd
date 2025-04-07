@@ -294,7 +294,7 @@ The model checking tools Tukey-Anscombe diagram and the QQ-diagram gave the foll
 plot(mlr_mod, which = c(1))
 ```
 
-We observe in Figure \ref{fig:tukey-anscombe} that the residuals seem to be spread around a horizontal line with no particular pattern. This indicates that the there is a linear relationship between the $\texttt{Age}$ and the covariates, which we assume in MLR. We also notice that the residuals are spread around zero, which we assumed to be the mean value. In addition, it seems that the residuals have the same variance approximately being $\sqrt{20}$.
+We observe in Figure \ref{fig:tukey-anscombe} that the residuals seem to be dispersed along a horizontal line with no specific pattern. This imply that there is a linear relationship between the $\texttt{Age}$ and the covariates, which we assume in MLR. We also notice that the residuals are spread around zero, which we assumed to be the mean value. In addition, it seems that the residuals have the same variance approximately being $\sqrt{20}$.
 
 ```{r, eval = TRUE, echo = FALSE, fig.cap="QQ-Diagram.", qq}
 plot(mlr_mod, which = c(2))
