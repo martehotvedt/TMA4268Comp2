@@ -1,5 +1,6 @@
 ---
 title: 'Compulsory Exercise 2: Age Prediction for Heart Failure'
+subtitle: 'Group 20'
 author:
 - Karianne Strand Bergem
 - Marte Ragnhild Hotvedt
